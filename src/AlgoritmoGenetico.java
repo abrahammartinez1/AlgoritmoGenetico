@@ -5,31 +5,13 @@ import java.util.Random;
 public class AlgoritmoGenetico {
     private static final int LONGITUD_CROMOSOMA = 11; // 1 mas para el fitness
     private static final int PORCENTAJE_ELITE_SIGUIENTE_GENERACION = 10; // 1 mas para el fitness
-    private static final int PUNTO_DE_CORTE = 50; //PORCENTAJE DONDE SE CORTA EL PADRE CON EL HIJO, NOS QUEDAMOS
-    //DEL PADRE CON EL % INDICADO AQUI
-    private static final int ELEMENTOS_POBLACION = 10;
+    private static final int PUNTO_DE_CORTE = 5; //DONDE SE CORTA EL PADRE CON EL HIJO, NOS QUEDAMOS
+    //DEL PADRE CON EL Nº INDICADO AQUI
+    private static final int ELEMENTOS_POBLACION = 100;
 
     private static final int MAX_ITERACIONES = 1000;
-    private static final int NUM_VARIACION_GENES = 10;
+    private static final int NUM_VARIACION_GENES = 10; //CANTIDAD DE ENTEROS QUE PODRA TENER UN GEN DE 1 A X
     private static final int[] CODIGO_OBJETIVO = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-
-    // Función que cruza 2 padres y devuelve el hijo
-    public static int[] cruzar(int[] padre1, int[] padre2) {
-        Random random = new Random();
-        int puntoCorte = random.nextInt(padre1.length); // Seleccionar un punto de corte aleatorio
-
-        // Crear hijo combinando los genes de ambos padres
-        int[] hijo = new int[padre1.length];
-        for (int i = 0; i < puntoCorte; i++) {
-            hijo[i] = padre1[i];
-        }
-        for (int i = puntoCorte; i < hijo.length; i++) {
-            hijo[i] = padre2[i];
-        }
-
-        return hijo;
-    }
-
     public static int calcularFitness(int[] cromosoma) {
         Integer fitness = 10; //numero de cifras que difieren del objetivo
             for (int j = 0; j < LONGITUD_CROMOSOMA-1; j++) {
@@ -37,22 +19,20 @@ public class AlgoritmoGenetico {
             }
             return fitness;
     }
-
-    public static int[][] ordenarPoblacion(int[][] poblacion) {
+    public static int[][] ordenarPorUltimaColumna(int[][] arr) {
         Comparator<int[]> comparator = new Comparator<int[]>() {
             @Override
             public int compare(int[] a, int[] b) {
-                return Integer.compare(a[10], b[10]);
+                return Integer.compare(a[a.length - 1], b[b.length - 1]);
             }
         };
-
-        // Ordenar el array utilizando el comparador personalizado
-        Arrays.sort(poblacion, comparator);
-        return poblacion;
+        Arrays.sort(arr, comparator);
+        return arr;
     }
 
     public static void mostrarPoblacion(int[][] poblacion){
         for ( int i = 0; i < ELEMENTOS_POBLACION; i++) {
+            System.out.print("CROMOSOMA " + i + "-->");
             for (int j = 0; j < LONGITUD_CROMOSOMA; j++) {
                 System.out.print(poblacion[i][j] + " ");
             }
@@ -60,21 +40,50 @@ public class AlgoritmoGenetico {
         }
     }
 
-    //CRUCE
-    public static int[][] SiguienteGeneracion(int[][] poblacion) {
-        int numElementosElite = (LONGITUD_CROMOSOMA-1) / 10;
-        int numElementosNOElite = ELEMENTOS_POBLACION - numElementosElite ;
-        int puntoCorte = PUNTO_DE_CORTE;
+    // Función para generar siguiente generación de población
+    public static int[][] generarSiguienteGeneracion(int[][] poblacion) {
+        // Ordenar población actual por fitness
+        Arrays.sort(poblacion, Comparator.comparingInt(a -> a[10]));
 
-        //RECORREMOS CADA CROMOSOMA DE LA POBLACION NO ELITE Y LO MEZCLAMOS CON UNO DE LA ELITE
-        //LOS MEZCLAREMOS CON TODOS LOS DE LA ELITE QUE PODAMOS, ALTERNANDOLOS
-        for (int i = numElementosNOElite; i > numElementosElite  ; i--) {
-            poblacion[i][LONGITUD_CROMOSOMA-1] = calcularFitness(poblacion[i]);
+        // Seleccionar el 10% de la población con mejor fitness para el cruce
+        int numSeleccionados = poblacion.length / 10;
+        int[][] seleccionados = new int[numSeleccionados][11];
+        for (int i = 0; i < numSeleccionados; i++) {
+            seleccionados[i] = Arrays.copyOf(poblacion[i], 11);
         }
 
+        // Generar nueva población cruzando los seleccionados con el resto
+        int[][] nuevaPoblacion = new int[100][11];
+        Random rnd = new Random();
+        int idx = 0;
+        for (int i = 0; i < numSeleccionados; i++) {
+            int[] padre = seleccionados[i];
+            for (int j = 0; j < 10; j++) {
+                nuevaPoblacion[idx][j] = padre[j];
+            }
+            for (int j = 0; j < 90; j += 10) {
+                int[] hijo = poblacion[numSeleccionados + rnd.nextInt(90)];
+                for (int k = 5; k < 10; k++) {
+                    nuevaPoblacion[idx][j + k] = hijo[k];
+                }
+            }
+            nuevaPoblacion[idx][10] = 0; // Inicializar fitness a cero
+            idx++;
+        }
 
-        return poblacion;
+        // Completar la nueva población con individuos aleatorios
+        while (idx < 100) {
+            for (int j = 0; j < 10; j++) {
+                nuevaPoblacion[idx][j] = rnd.nextInt(10);
+            }
+            nuevaPoblacion[idx][10] = rnd.nextInt(100); // Asignar fitness aleatorio
+            idx++;
+        }
+
+        return nuevaPoblacion;
     }
+
+
 
     public static void main(String[] args) {
 
@@ -88,6 +97,9 @@ public class AlgoritmoGenetico {
             }
         }
 
+        System.out.println("POBLACION ALEATORIA : ");
+        mostrarPoblacion(poblacion);
+
         // Calcular el fitness para cada cromosoma
         for (int i = 0; i < ELEMENTOS_POBLACION  ; i++) {
              //   VectorConFitness[i] = calcularFitness(poblacion[i]);
@@ -95,20 +107,23 @@ public class AlgoritmoGenetico {
         }
 
         //Mostrar por pantalla los valores de la poblacion inicial + fitness
-        System.out.println("POBLACION 1 : ");
+        System.out.println("POBLACION ALEATORIA + FITNESS : ");
         mostrarPoblacion(poblacion);
 
         // Ordenar el array utilizando el comparador personalizado
-        poblacion = ordenarPoblacion(poblacion);
+        //poblacion = ordenarPoblacion(poblacion);
+        poblacion = ordenarPorUltimaColumna(poblacion);
 
         //Mostrar POBLACION ORDENADA POR FITNESS
         System.out.println("POBLACION ORDENADA : ");
         mostrarPoblacion(poblacion);
 
         //Creamos siguiente generacion cruzando el 10% de la elite con el resto
-        poblacion = SiguienteGeneracion(poblacion);
+        // poblacion = SiguienteGeneracion(poblacion);
 
-
+        //Mostrar POBLACION ORDENADA POR FITNESS
+        //System.out.println("SIGUIENTE GENERACION : ");
+        //mostrarPoblacion(poblacion);
 
 
 
