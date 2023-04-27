@@ -4,7 +4,9 @@ import java.util.Random;
 
 public class AlgoritmoGenetico {
     private static final int LONGITUD_CROMOSOMA = 11; // 1 mas para el fitness
+    private static final int PORCENTAJE_ELITE_SIGUIENTE_GENERACION = 10; // 1 mas para el fitness
     private static final int ELEMENTOS_POBLACION = 10;
+
     private static final int MAX_ITERACIONES = 1000;
     private static final int NUM_VARIACION_GENES = 10;
     private static final int[] CODIGO_OBJETIVO = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
@@ -56,6 +58,15 @@ public class AlgoritmoGenetico {
         }
     }
 
+    public static int[][] SiguienteGeneracion(int[][] poblacion) {
+        int numElementosElite = (LONGITUD_CROMOSOMA-1) / 10;
+        int numElementosNOElite = ELEMENTOS_POBLACION - numElementosElite ;
+
+
+
+        return poblacion;
+    }
+
     public static void main(String[] args) {
 
         int[][] poblacion = new int[ELEMENTOS_POBLACION][LONGITUD_CROMOSOMA];
@@ -85,7 +96,8 @@ public class AlgoritmoGenetico {
         System.out.println("POBLACION ORDENADA : ");
         mostrarPoblacion(poblacion);
 
-
+        //Creamos siguiente generacion
+        poblacion = SiguienteGeneracion(poblacion);
 
         /*
         // Crear dos padres aleatorios
