@@ -7,7 +7,7 @@ public class AlgoritmoGenetico {
     private static final int PORCENTAJE_ELITE_SIGUIENTE_GENERACION = 10; // 1 mas para el fitness
     private static final int PUNTO_DE_CORTE = 5; //DONDE SE CORTA EL PADRE CON EL HIJO, NOS QUEDAMOS
     //DEL PADRE CON EL Nº INDICADO AQUI
-    private static final int ELEMENTOS_POBLACION = 10;
+    private static final int ELEMENTOS_POBLACION = 100;
 
     private static final int MAX_ITERACIONES = 1000;
     private static final int NUM_VARIACION_GENES = 10; //CANTIDAD DE ENTEROS QUE PODRA TENER UN GEN DE 1 A X
@@ -67,10 +67,7 @@ public class AlgoritmoGenetico {
                 nuevaPoblacion[idx][j] = padre[j];
             }
 
-
-
-
-            for (int j = 0; j < LONGITUD_CROMOSOMA; j += 10) {
+        for (int j = 0; j < LONGITUD_CROMOSOMA; j += 10) {
                 int[] hijo = poblacion[numSeleccionados + rnd.nextInt(numNoElite)];
                 for (int k = 5; k < 10; k++) {
                     nuevaPoblacion[idx][k] = hijo[k];
@@ -80,17 +77,17 @@ public class AlgoritmoGenetico {
             idx++;
         }
 
-        // Completar la nueva población con individuos aleatorios
         /*
-        while (idx < 100) {
-            for (int j = 0; j < 10; j++) {
+        // Completar la nueva población con individuos aleatorios
+        while (idx < ELEMENTOS_POBLACION) {
+            for (int j = 0; j < LONGITUD_CROMOSOMA; j++) {
                 nuevaPoblacion[idx][j] = rnd.nextInt(10);
             }
-            nuevaPoblacion[idx][10] = rnd.nextInt(100); // Asignar fitness aleatorio
+            nuevaPoblacion[idx][10] = rnd.nextInt(ELEMENTOS_POBLACION); // Asignar fitness aleatorio
             idx++;
         }
-        */
 
+         */
 
         return nuevaPoblacion;
     }
@@ -132,10 +129,19 @@ public class AlgoritmoGenetico {
 
         //Creamos siguiente generacion cruzando el 10% de la elite con el resto
          poblacion = generarSiguienteGeneracion(poblacion);
+
         //Mostrar POBLACION ORDENADA POR FITNESS
         System.out.println("SIGUIENTE GENERACION : ");
+
+        // Calcular el fitness para cada cromosoma
+        for (int i = 0; i < ELEMENTOS_POBLACION  ; i++) {
+            //   VectorConFitness[i] = calcularFitness(poblacion[i]);
+            poblacion[i][LONGITUD_CROMOSOMA-1] = calcularFitness(poblacion[i]);
+        }
+        poblacion = ordenarPorUltimaColumna(poblacion);
         mostrarPoblacion(poblacion);
 
+        //A CONTINUAR:   FALTA RELLENAR EN POBLACION EL RESTO DE INDIVIDUOS QUE NO SON ELITE
 
         //Mostrar POBLACION ORDENADA POR FITNESS
         //System.out.println("SIGUIENTE GENERACION : ");
