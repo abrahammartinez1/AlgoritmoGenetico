@@ -5,6 +5,8 @@ import java.util.Random;
 public class AlgoritmoGenetico {
     private static final int LONGITUD_CROMOSOMA = 11; // 1 mas para el fitness
     private static final int PORCENTAJE_ELITE_SIGUIENTE_GENERACION = 10; // 1 mas para el fitness
+    private static final int PUNTO_DE_CORTE = 50; //PORCENTAJE DONDE SE CORTA EL PADRE CON EL HIJO, NOS QUEDAMOS
+    //DEL PADRE CON EL % INDICADO AQUI
     private static final int ELEMENTOS_POBLACION = 10;
 
     private static final int MAX_ITERACIONES = 1000;
@@ -58,10 +60,17 @@ public class AlgoritmoGenetico {
         }
     }
 
+    //CRUCE
     public static int[][] SiguienteGeneracion(int[][] poblacion) {
         int numElementosElite = (LONGITUD_CROMOSOMA-1) / 10;
         int numElementosNOElite = ELEMENTOS_POBLACION - numElementosElite ;
+        int puntoCorte = PUNTO_DE_CORTE;
 
+        //RECORREMOS CADA CROMOSOMA DE LA POBLACION NO ELITE Y LO MEZCLAMOS CON UNO DE LA ELITE
+        //LOS MEZCLAREMOS CON TODOS LOS DE LA ELITE QUE PODAMOS, ALTERNANDOLOS
+        for (int i = numElementosNOElite; i > numElementosElite  ; i--) {
+            poblacion[i][LONGITUD_CROMOSOMA-1] = calcularFitness(poblacion[i]);
+        }
 
 
         return poblacion;
@@ -96,29 +105,13 @@ public class AlgoritmoGenetico {
         System.out.println("POBLACION ORDENADA : ");
         mostrarPoblacion(poblacion);
 
-        //Creamos siguiente generacion
+        //Creamos siguiente generacion cruzando el 10% de la elite con el resto
         poblacion = SiguienteGeneracion(poblacion);
 
-        /*
-        // Crear dos padres aleatorios
-        int[] padre1 = new int[10];
-        int[] padre2 = new int[10];
-        Random random = new Random();
-        for (int i = 0; i < padre1.length; i++) {
-            padre1[i] = random.nextInt(100) + 1;
-            padre2[i] = random.nextInt(100) + 1;
-        }
 
 
-        // Cruzar los padres para obtener un hijo
-        int[] hijo = cruzar(padre1, padre2);
 
-        // Imprimir los padres y el hijo resultante
-        System.out.println("Padre 1: " + Arrays.toString(padre1));
-        System.out.println("Padre 2: " + Arrays.toString(padre2));
-        System.out.println("Hijo:    " + Arrays.toString(hijo));
-        */
-         
+
     }
 
 
